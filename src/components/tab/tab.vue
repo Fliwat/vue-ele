@@ -2,6 +2,7 @@
   <div class="tab">
     <cube-tab-bar
       :showSlider=true
+      :useTransition=false
       v-model="selectedLabel"
       :data="tabs"
       ref="tabBar"
@@ -15,6 +16,9 @@
         :show-dots=false
         :initial-index="index"
         ref="slide"
+        @change="onChange"
+        @scroll="onScroll"
+        :options="slideOptions"
       >
         <cube-slide-item>
           <goods></goods>
@@ -46,7 +50,12 @@
           label: '评价'
         }, {
           label: '商家'
-        }]
+        }],
+        slideOptions: {
+          listenScroll: true,
+          probeType: 3,
+          directionLockThreshold: 0
+        }
       }
     },
     components: {
@@ -64,6 +73,17 @@
             return value.label === newVal
           })
         }
+      }
+    },
+    methods: {
+      onChange(currentIndex) {
+        this.index = currentIndex
+      },
+      onScroll(pos) {
+        const tabBarWidth = this.$refs.tabBar.$el.clientWidth
+        const slideWidth = this.$refs.slide.slide.scrollerWidth
+        const transform = (-pos.x / slideWidth) * tabBarWidth
+        this.$refs.tabBar.setSliderTransform(transform)
       }
     }
   }

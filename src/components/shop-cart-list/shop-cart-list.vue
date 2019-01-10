@@ -8,7 +8,10 @@
       type="shop-cart-list"
       :z-index=90
     >
-      <transition name="move">
+      <transition
+        name="move"
+        @after-leave="afterLeave"
+      >
         <div v-show="visible">
           <div class="list-header">
             <h1 class="title">购物车</h1>
@@ -26,7 +29,7 @@
                   <span>¥{{food.price*food.count}}</span>
                 </div>
                 <div class="cart-control-wrapper">
-                  <cart-control :food="food"></cart-control>
+                  <cart-control @add="onAdd" :food="food"></cart-control>
                 </div>
               </li>
             </ul>
@@ -41,6 +44,8 @@
   import CartControl from 'components/cart-control/cart-control'
 
   const EVENT_HIDE = 'hide'
+  const EVENT_ADD = 'add'
+  const EVENT_LEAVE = 'leave'
 
   export default {
     name: 'shop-cart-list',
@@ -58,18 +63,38 @@
       }
     },
     methods: {
+      onAdd(target) {
+        this.$emit(EVENT_ADD, target)
+      },
+      afterLeave() {
+        this.$emit(EVENT_LEAVE)
+      },
+      maskClick() {
+        this.hide()
+      },
       empty() {
-        // this.selectFoods = []
+        this.dialogComp = this.dialogComp || this.$createDialog({
+          type: 'confirm',
+          content: '清空购物车？',
+          $events: {
+            confirm: () => {
+              this.selectFoods.forEach((food) => {
+                food.count = 0
+              })
+            }
+          }
+        })
+        this.dialogComp.show()
       },
       show() {
         this.visible = true
+        this.$nextTick(() => {
+          this.$refs.listContent.refresh()
+        })
       },
       hide() {
         this.visible = false
         this.$emit(EVENT_HIDE)
-      },
-      maskClick() {
-        this.hide()
       }
     },
     components: {

@@ -14,7 +14,7 @@
         <div class="desc">另需配送费¥{{deliveryPrice}}元</div>
       </div>
       <div class="content-right">
-        <div class="pay" :class="payClass">
+        <div @click="pay" class="pay" :class="payClass">
           {{payDesc}}
         </div>
       </div>
@@ -67,12 +67,20 @@
       minPrice: {
         type: Number,
         default: 0
+      },
+      fold: {
+        type: Boolean,
+        default: true
+      },
+      sticky: {
+        type: Boolean,
+        default: false
       }
     },
     data() {
       return {
         balls: createBalls(),
-        listFold: true
+        listFold: this.fold
       }
     },
     created() {
@@ -154,10 +162,21 @@
           }
           this.listFold = false
           this._showShopCartList()
+          this._showShopCartSticky()
         } else {
           this.listFold = true
           this._hideShopCartList()
         }
+      },
+      pay(e) {
+        if (this.totalPrice < this.minPrice) {
+          return
+        }
+        this.$createDialog({
+          title: '提示',
+          content: `您需要支付${this.totalPrice}元`
+        }).show()
+        e.stopPropagation()
       },
       _showShopCartList() {
         this.shopCartListComp = this.shopCartListComp || this.$createShopCartList({
@@ -167,13 +186,45 @@
           $events: {
             hide: () => {
               this.listFold = true
+            },
+            leave: () => {
+              this._hideShopCartSticky()
+            },
+            add: (el) => {
+              this.shopCartStickyComp.drop(el)
             }
           }
         })
         this.shopCartListComp.show()
       },
+      _showShopCartSticky() {
+        this.shopCartStickyComp = this.shopCartStickyComp || this.$createShopCartSticky({
+          $props: {
+            selectFoods: 'selectFoods',
+            deliveryPrice: 'deliveryPrice',
+            minPrice: 'minPrice',
+            fold: 'listFold',
+            list: this.shopCartListComp
+          }
+        })
+        this.shopCartStickyComp.show()
+      },
       _hideShopCartList() {
-        this.shopCartListComp.hide()
+        const list = this.sticky ? this.$parent.list : this.shopCartListComp
+        list.hide && list.hide()
+      },
+      _hideShopCartSticky() {
+        this.shopCartStickyComp.hide()
+      }
+    },
+    watch: {
+      fold(newVal) {
+        this.listFold = newVal
+      },
+      totalCount(newVal) {
+        if (!this.listFold && !newVal) {
+          this._hideShopCartList()
+        }
       }
     },
     components: {

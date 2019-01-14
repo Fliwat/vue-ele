@@ -40,6 +40,7 @@
               v-for="food in good.foods"
               :key="food.name"
               class="food-item"
+              @click="selectFood(food)"
             >
               <div class="icon">
                 <img width="57" height="57" :src="food.icon">
@@ -73,6 +74,7 @@
       >
       </shop-cart>
     </div>
+    <!-- <food ref="food" :food="selectedFood"></food> -->
   </div>
 </template>
 
@@ -82,6 +84,7 @@
   import ShopCart from 'components/shop-cart/shop-cart'
   import CartControl from 'components/cart-control/cart-control'
   import Bubble from 'components/bubble/bubble'
+  import Food from 'components/food/food'
 
   export default {
     name: 'goods',
@@ -96,6 +99,7 @@
     data() {
       return {
         goods: [],
+        selectedFood: {},
         scrollOptions: {
           click: false,
           directionLockThreshold: 0
@@ -145,13 +149,49 @@
       },
       onAdd(target) {
         this.$refs.shopCart.drop(target)
+      },
+      selectFood(food) {
+        this.selectedFood = food
+        this._showFood()
+        this._showShopCartSticky()
+      },
+      _showFood() {
+        this.foodComp = this.foodComp || this.$createFood({
+          $props: {
+            food: 'selectedFood',
+            $events: {
+              leave: () => {
+                this._hideShopCartList()
+              },
+              add: (el) => {
+                this.shopCartStickyComp.drop(el)
+              }
+            }
+          }
+        })
+        this.foodComp.show()
+      },
+      _showShopCartSticky() {
+        this.shopCartStickyComp = this.shopCartStickyComp || this.$createShopCartSticky({
+          $props: {
+            selectFoods: 'selectFoods',
+            deliveryPrice: this.seller.deliveryPrice,
+            minPrice: this.seller.minPrice,
+            fold: true
+          }
+        })
+        this.shopCartStickyComp.show()
+      },
+      _hideShopCartList() {
+        this.shopCartStickyComp.hide()
       }
     },
     components: {
       SupportIco,
       ShopCart,
       CartControl,
-      Bubble
+      Bubble,
+      Food
     }
   }
 </script>

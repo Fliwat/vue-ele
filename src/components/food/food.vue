@@ -36,6 +36,39 @@
             <h1 class="title">商品信息</h1>
             <p class="text">{{food.info}}</p>
           </div>
+          <split></split>
+          <div class="rating">
+            <h1 class="title">商品评价</h1>
+            <rating-select
+              @select="onSelect"
+              @toggle="onToggle"
+              :ratings="ratings"
+              :selectType="selectType"
+              :onlyContent="onlyContent"
+              :desc="desc"
+            >
+            </rating-select>
+            <div class="rating-wrapper">
+              <ul v-show="computedRatings && computedRatings.length">
+                <li
+                  v-for="(rating, index) in computedRatings"
+                  class="rating-item border-bottom-1px"
+                  :key="index"
+                >
+                  <div class="user">
+                    <span class="name">{{rating.username}}</span>
+                    <img class="avatar" width="12" height="12" :src="rating.avatar">
+                  </div>
+                  <div class="time">{{format(rating.rateTime)}}</div>
+                  <p class="text">
+                    <span :class="{'icon-thumb_up':rating.rateType===0,'icon-thumb_down':rating.rateType===1}"></span>
+                    {{rating.text}}
+                  </p>
+                </li>
+              </ul>
+              <div class="no-rating" v-show="!computedRatings || !computedRatings.length">暂无评价</div>
+            </div>
+          </div>
         </div>
       </cube-scroll>
     </div>
@@ -46,10 +79,14 @@
   import popupMixin from 'common/mixins/popup'
   import CartControl from 'components/cart-control/cart-control'
   import Split from 'components/split/split'
+  import RatingSelect from 'components/rating-select/rating-select'
+  import moment from 'moment'
 
   const EVENT_SHOW = 'show'
   const EVENT_ADD = 'add'
   const EVENT_LEAVE = 'leave'
+
+  const ALL = 2
 
   export default {
     name: 'food',
@@ -60,6 +97,34 @@
         default() {
           return {}
         }
+      }
+    },
+    data() {
+      return {
+        onlyContent: false,
+        selectType: ALL,
+        desc: {
+          all: '全部',
+          positive: '推荐',
+          negative: '吐槽'
+        }
+      }
+    },
+    computed: {
+      ratings() {
+        return this.food.ratings
+      },
+      computedRatings() {
+        let ret = []
+        this.ratings.forEach((rating) => {
+          if (this.onlyContent && !rating.text) {
+            return
+          }
+          if (this.selectType === ALL || rating.rateType === this.selectType) {
+            ret.push(rating)
+          }
+        })
+        return ret
       }
     },
     created() {
@@ -79,11 +144,21 @@
       },
       addFood(target) {
         this.$emit(EVENT_ADD, target)
+      },
+      format(time) {
+        return moment(time).format('YYYY-MM-DD hh:mm')
+      },
+      onSelect(type) {
+        this.selectType = type
+      },
+      onToggle() {
+        this.onlyContent = !this.onlyContent
       }
     },
     components: {
       CartControl,
-      Split
+      Split,
+      RatingSelect
     }
   }
 </script>
@@ -188,4 +263,53 @@
         padding: 0 8px
         font-size: $fontsize-small
         color: $color-grey
+    .rating
+      padding-top: 18px
+      .title
+        line-height: 14px
+        margin-left: 18px
+        font-size: $fontsize-medium
+        color: $color-dark-grey
+      .rating-wrapper
+        padding: 0 18px
+        .rating-item
+          position: relative
+          padding: 16px 0
+          &:last-child
+            border-none()
+          .user
+            position: absolute
+            right: 0
+            top: 16px
+            display: flex
+            align-items: center
+            line-height: 12px
+            .name
+              margin-right: 6px
+              font-size: $fontsize-small-s
+              color: $color-light-grey
+            .avatar
+              border-radius: 50%
+          .time
+            margin-bottom: 6px
+            line-height: 12px
+            font-size: $fontsize-small-s
+            color: $color-light-grey
+          .text
+            line-height: 16px
+            font-size: $fontsize-small
+            color: $color-dark-grey
+            .icon-thumb_up, .icon-thumb_down
+              margin-right: 4px
+              line-height: 16px
+              font-size: $fontsize-small
+            .icon-thumb_up
+              color: $color-blue
+            .icon-thumb_down
+              color: $color-light-grey
+
+        .no-rating
+          padding: 16px 0
+          font-size: $fontsize-small
+          color: $color-light-grey
 </style>

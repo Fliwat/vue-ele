@@ -1,5 +1,5 @@
 <template>
-  <cube-scroll ref="scroll" class="ratings" :options="scrollOptions">
+  <cube-scroll ref="scroll" class="ratings" :data="computedRatings" :options="scrollOptions">
     <div class="ratings-content">
       <div class="overview">
         <div class="overview-left">
@@ -25,10 +25,19 @@
         </div>
       </div>
       <split></split>
+      <rating-select
+        @select="onSelect"
+        @toggle="onToggle"
+        :ratings="ratings"
+        :selectType="selectType"
+        :onlyContent="onlyContent"
+        v-if="ratings.length"
+      >
+      </rating-select>
       <div class="rating-wrapper">
         <ul>
           <li
-            v-for="(rating, index) in ratings"
+            v-for="(rating, index) in computedRatings"
             :key="index"
             class="rating-item border-bottom-1px"
           >
@@ -61,14 +70,17 @@
 </template>
 
 <script>
+  import ratingMixin from 'common/mixins/rating'
   import moment from 'moment'
   import { getRatings } from 'api'
   import Star from 'components/star/star'
   import Split from 'components/split/split'
+  import RatingSelect from 'components/rating-select/rating-select'
 
 
   export default {
     name: 'ratings',
+    mixins: [ratingMixin],
     props: {
       data: {
         type: Object
@@ -86,9 +98,6 @@
     computed: {
       seller() {
         return this.data.seller || {}
-      },
-      computedRatings() {
-
       }
     },
     methods: {
@@ -106,7 +115,8 @@
     },
     components: {
       Star,
-      Split
+      Split,
+      RatingSelect
     }
   }
 </script>
@@ -116,6 +126,10 @@
   @import "~common/stylus/mixin"
 
   .ratings
+    position: relative
+    text-align: left
+    white-space: normal
+    height: 100%
     .overview
       display: flex
       padding: 18px 0
@@ -208,7 +222,6 @@
             line-height: 18px
             color: $color-dark-grey
             font-size: $fontsize-small
-            white-space: normal
           .recommend
             display: flex
             align-items: center

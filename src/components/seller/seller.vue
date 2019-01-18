@@ -28,9 +28,9 @@
             </div>
           </li>
         </ul>
-        <div class="favorite">
+        <div @click="toggleFavorite" class="favorite">
           <span class="icon-favorite" :class="{'active':favorite}"></span>
-          <span class="text">收藏</span>
+          <span class="text">{{favoriteText}}</span>
         </div>
       </div>
       <split></split>
@@ -86,6 +86,7 @@
   import Star from 'components/star/star'
   import Split from 'components/split/split'
   import SupportIco from 'components/support-ico/support-ico'
+  import { saveToLocal, loadFromLocal } from 'common/js/storage'
 
   export default {
     name: 'ratings',
@@ -105,15 +106,25 @@
           stopPropagation: true,
           directionLockThreshold: 0
         },
-        favorite: ''
+        favorite: false
       }
+    },
+    created() {
+      this.favorite = loadFromLocal(this.seller.id, 'favorite', false)
     },
     computed: {
       seller() {
         return this.data.seller || {}
+      },
+      favoriteText() {
+        return this.favorite ? '已收藏' : '收藏'
       }
     },
     methods: {
+      toggleFavorite() {
+        this.favorite = !this.favorite
+        saveToLocal(this.seller.id, 'favorite', this.favorite)
+      }
     },
     components: {
       Star,

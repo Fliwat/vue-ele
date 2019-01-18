@@ -8,6 +8,7 @@
 </template>
 
 <script>
+import qs from 'query-string'
 import VHeader from 'components/v-header/v-header'
 import Goods from 'components/goods/goods'
 import Ratings from 'components/ratings/ratings'
@@ -23,7 +24,9 @@ export default {
   },
   data() {
     return {
-      seller: {}
+      seller: {
+        id: qs.parse(location.search).id
+      }
     }
   },
   computed: {
@@ -54,7 +57,9 @@ export default {
   },
   methods: {
     _getSeller() {
-      getSeller().then(seller => {
+      getSeller({
+        id: this.seller.id
+      }).then(seller => {
         this.seller = seller
       })
     }

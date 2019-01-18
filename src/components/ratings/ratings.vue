@@ -77,7 +77,6 @@
   import Split from 'components/split/split'
   import RatingSelect from 'components/rating-select/rating-select'
 
-
   export default {
     name: 'ratings',
     mixins: [ratingMixin],
@@ -104,7 +103,9 @@
       fetch() {
         if (!this.fetched) {
           this.fetched = true
-          getRatings().then((ratings) => {
+          getRatings({
+            id: this.seller.id
+          }).then((ratings) => {
             this.ratings = ratings
           })
         }

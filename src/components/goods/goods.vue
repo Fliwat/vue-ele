@@ -84,7 +84,6 @@
   import ShopCart from 'components/shop-cart/shop-cart'
   import CartControl from 'components/cart-control/cart-control'
   import Bubble from 'components/bubble/bubble'
-  import Food from 'components/food/food'
 
   export default {
     name: 'goods',
@@ -192,8 +191,7 @@
       SupportIco,
       ShopCart,
       CartControl,
-      Bubble,
-      Food
+      Bubble
     }
   }
 </script>

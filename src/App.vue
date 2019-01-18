@@ -49,7 +49,7 @@ export default {
         data: {
           seller: this.seller
         }
-      },]
+      }]
     }
   },
   created() {

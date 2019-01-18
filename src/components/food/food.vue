@@ -121,7 +121,7 @@
     },
     methods: {
       afterLeave() {
-        this.$emit('EVENT_LEAVE')
+        this.$emit(EVENT_LEAVE)
       },
       addFirst(event) {
         this.$set(this.food, 'count', 1)
